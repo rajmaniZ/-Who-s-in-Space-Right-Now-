@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Astronauts in Space</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #333;
+    }
+    .astro {
+      background: white;
+      margin: 15px auto;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    img {
+      width: 80px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Who's in Space Right Now?</h1>
+  <button onclick="loadAstronauts()">Show Astronauts</button>
+  <div id="container"></div>
+
+  <script>
+    async function loadAstronauts() {
+      const container = document.getElementById('container');
+      container.innerHTML = 'Loading...';
+
+      try {
+        // Get astronauts
+        const res = await fetch("http://api.open-notify.org/astros.json");
+        const data = await res.json();
+
+        const astronauts = data.people;
+
+        container.innerHTML = '';
+
+        for (let person of astronauts) {
+          const name = person.name;
+          const craft = person.craft;
+
+          // Simulated nationality mapping
+          let country = "usa";
+          if (name.toLowerCase().includes("sergey")) country = "russia";
+          if (name.toLowerCase().includes("kikina")) country = "russia";
+          if (name.toLowerCase().includes("furukawa")) country = "japan";
+
+          // Get country flag
+          const flagRes = await fetch(`https://restcountries.com/v3.1/name/${country}`);
+          const flagData = await flagRes.json();
+          const flagUrl = flagData[0].flags.png;
+
+          // Create UI
+          const div = document.createElement('div');
+          div.className = 'astro';
+          div.innerHTML = `
+            <h2>${name}</h2>
+            <p><strong>Craft:</strong> ${craft}</p>
+            <p><strong>Country:</strong> ${country.toUpperCase()}</p>
+            <img src="${flagUrl}" alt="Flag of ${country}">
+          `;
+          container.appendChild(div);
+        }
+
+      } catch (err) {
+        container.innerHTML = `<p>Error loading astronauts: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
